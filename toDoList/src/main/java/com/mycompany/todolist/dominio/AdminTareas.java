@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  *
- * @author JoseH
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class AdminTareas {
     private List<Tarea> tareas;

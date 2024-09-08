@@ -6,7 +6,7 @@ package com.mycompany.todolist.dominio;
 
 /**
  *
- * @author JoseH
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class Tarea {
     private String descripcion;

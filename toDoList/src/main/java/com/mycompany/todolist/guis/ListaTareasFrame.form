@@ -45,11 +45,6 @@
       </Layout>
       <SubComponents>
         <Component class="javax.swing.JLabel" name="botonAgregar">
-          <Properties>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="2" name="C:\Users\JoseH\OneDrive\Documentos\NetBeansProjects\toDoList\src\main\java\com\mycompany\todolist\guis\boton-agregar.png"/>
-            </Property>
-          </Properties>
           <Events>
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="botonAgregarMouseClicked"/>
             <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="botonAgregarMousePressed"/>
@@ -90,11 +85,6 @@
           </Constraints>
         </Component>
         <Component class="javax.swing.JLabel" name="editarBtn">
-          <Properties>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="2" name="C:/Users/JoseH/OneDrive/Documentos/NetBeansProjects/toDoList/src/main/java/com/mycompany/todolist/guis/Captura de pantalla 2024-09-07 021232.png"/>
-            </Property>
-          </Properties>
           <Events>
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="editarBtnMouseClicked"/>
           </Events>

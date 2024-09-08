@@ -9,7 +9,7 @@ import com.mycompany.todolist.dominio.Tarea;
 
 /**
  *
- * @author JoseH
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class EscribirTareaFrame extends javax.swing.JFrame {
     AdminTareas adminTareas;

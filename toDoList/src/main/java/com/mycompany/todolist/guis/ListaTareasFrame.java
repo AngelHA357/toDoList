@@ -20,7 +20,7 @@ import javax.swing.JRadioButton;
 
 /**
  *
- * @author JoseH
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class ListaTareasFrame extends javax.swing.JFrame {
     AdminTareas adminTareas;

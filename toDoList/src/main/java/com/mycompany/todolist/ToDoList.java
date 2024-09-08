@@ -8,7 +8,7 @@ import com.mycompany.todolist.guis.ListaTareasFrame;
 
 /**
  *
- * @author JoseH
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class ToDoList {
     public static void main(String args[]){
