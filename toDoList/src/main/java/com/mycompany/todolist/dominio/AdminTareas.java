@@ -8,6 +8,7 @@ import java.util.List;
  * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class AdminTareas {
+
     private List<Tarea> tareas;
 
     public AdminTareas() {
@@ -47,5 +48,25 @@ public class AdminTareas {
             System.out.println((i + 1) + ". " + tareas.get(i));
         }
     }
-    
+
+    public List<Tarea> obtenerTareasCompletadas() {
+        List<Tarea> tareasCompletadas = new ArrayList<>();
+        for (Tarea tarea : tareas) {
+            if (tarea.isEstaCompletada()) {
+                tareasCompletadas.add(tarea);
+            }
+        }
+        return tareasCompletadas;
+    }
+
+    public List<Tarea> obtenerTareasPendientes() {
+        List<Tarea> tareasPendientes = new ArrayList<>();
+        for (Tarea tarea : tareas) {
+            if (!tarea.isEstaCompletada()) {
+                tareasPendientes.add(tarea);
+            }
+        }
+        return tareasPendientes;
+    }
+
 }

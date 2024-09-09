@@ -6,6 +6,7 @@ package com.mycompany.todolist.test;
 
 import com.mycompany.todolist.dominio.AdminTareas;
 import com.mycompany.todolist.dominio.Tarea;
+import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -86,6 +87,72 @@ public class AdminTareasTest {
         Tarea tarea = adminTareas.getTareas().get(0);
         tarea.setCompletada(true);
         assertTrue(tarea.isEstaCompletada());
+    }
+
+    /**
+     * Prueba para verificar que el filtrado de tareas completadas funciona
+     * correctamente.
+     */
+    @Test
+    public void testObtenerTareasCompletadas() {
+        adminTareas.agregarTarea("Una tarea");
+        adminTareas.agregarTarea("Segunda tarea");
+        adminTareas.agregarTarea("Tercera tarea");
+
+        // Marcar algunas tareas como completadas
+        adminTareas.getTareas().get(0).setCompletada(true);
+        adminTareas.getTareas().get(2).setCompletada(true);
+
+        List<Tarea> tareasCompletadas = adminTareas.obtenerTareasCompletadas();
+        assertEquals(2, tareasCompletadas.size());
+        assertTrue(tareasCompletadas.stream().allMatch(Tarea::isEstaCompletada));
+    }
+
+    /**
+     * Prueba para verificar que el filtrado de tareas pendientes funciona
+     * correctamente.
+     */
+    @Test
+    public void testObtenerTareasPendientes() {
+        adminTareas.agregarTarea("Una tarea");
+        adminTareas.agregarTarea("Segunda tarea");
+        adminTareas.agregarTarea("Tercera tarea");
+
+        // Marcar algunas tareas como completadas
+        adminTareas.getTareas().get(0).setCompletada(true);
+
+        List<Tarea> tareasPendientes = adminTareas.obtenerTareasPendientes();
+        assertEquals(2, tareasPendientes.size());
+        assertTrue(tareasPendientes.stream().noneMatch(Tarea::isEstaCompletada));
+    }
+
+    /**
+     * Prueba para verificar que cuando no hay tareas completadas, la lista
+     * devuelta está vacía.
+     */
+    @Test
+    public void testTareasCompletadasConTodasPendientes() {
+        adminTareas.agregarTarea("Una tarea");
+        adminTareas.agregarTarea("Segunda tarea");
+
+        List<Tarea> tareasCompletadas = adminTareas.obtenerTareasCompletadas();
+        assertTrue(tareasCompletadas.isEmpty());
+    }
+
+    /**
+     * Prueba para verificar que cuando todas las tareas están completadas, el
+     * filtrado de tareas pendientes devuelve una lista vacía.
+     */
+    @Test
+    public void testTareasPendienteConTodasCompletadas() {
+        adminTareas.agregarTarea("Una tarea");
+        adminTareas.agregarTarea("Segunda tarea");
+
+        adminTareas.getTareas().get(0).setCompletada(true);
+        adminTareas.getTareas().get(1).setCompletada(true);
+
+        List<Tarea> tareasPendientes = adminTareas.obtenerTareasPendientes();
+        assertTrue(tareasPendientes.isEmpty());
     }
 
     /**
