@@ -1,5 +1,4 @@
 com\mycompany\todolist\guis\EscribirTareaFrame$1.class
-com\mycompany\todolist\guis\ListaTareasFrame$4$1.class
 com\mycompany\todolist\guis\ListaTareasFrame$4.class
 com\mycompany\todolist\ToDoList.class
 com\mycompany\todolist\guis\ListaTareasFrame$9.class
@@ -13,6 +12,7 @@ com\mycompany\todolist\guis\ListaTareasFrame$8.class
 com\mycompany\todolist\guis\EscribirTareaFrame$3.class
 com\mycompany\todolist\guis\ListaTareasFrame$6.class
 com\mycompany\todolist\dominio\Tarea.class
+com\mycompany\todolist\guis\ListaTareasFrame$10.class
 com\mycompany\todolist\guis\ListaTareasFrame$2.class
 com\mycompany\todolist\guis\ListaTareasFrame$3.class
 com\mycompany\todolist\guis\ListaTareasFrame.class

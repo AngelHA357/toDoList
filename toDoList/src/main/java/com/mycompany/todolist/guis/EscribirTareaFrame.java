@@ -10,27 +10,48 @@ import com.mycompany.todolist.dominio.Tarea;
 /**
  *
  * @author Jose Armenta, Jose Huerta, Victor Encinas
+ * Clase de frame para escribir una nueva tarea o sobreescribir una existente.
  */
 public class EscribirTareaFrame extends javax.swing.JFrame {
     AdminTareas adminTareas;
     ListaTareasFrame ventanaPrincipal; 
     boolean editar;
-    String descripcion;
+    String descripcion, filtro;
     
     /**
-     * Creates new form EscribirTareaFrame
+     * Crea una nueva instancia de EscribirTareaFrame para agregar una nueva
+     * tarea.
+     *
+     * @param adminTareas El administrador de tareas que gestiona las tareas.
+     * @param ventanaPrincipal La ventana principal que muestra la lista de
+     * tareas.
+     * @param filtro El filtro actual de las tareas (Pendientes, Completadas,
+     * etc.).
      */
-    public EscribirTareaFrame(AdminTareas adminTareas, ListaTareasFrame ventanaPrincipal) {
+    public EscribirTareaFrame(AdminTareas adminTareas, ListaTareasFrame ventanaPrincipal, String filtro) {
         initComponents();
         this.adminTareas = adminTareas;
         this.ventanaPrincipal = ventanaPrincipal;
+        this.filtro = filtro;
     }
     
-    public EscribirTareaFrame(AdminTareas adminTareas, ListaTareasFrame ventanaPrincipal, String descripcion) {
+    /**
+     * Crea una nueva instancia de EscribirTareaFrame para editar una tarea
+     * existente.
+     *
+     * @param adminTareas El administrador de tareas que gestiona las tareas.
+     * @param ventanaPrincipal La ventana principal que muestra la lista de
+     * tareas.
+     * @param descripcion La descripción de la tarea que se va a editar.
+     * @param filtro El filtro actual de las tareas (Pendientes, Completadas,
+     * etc.).
+     */
+    public EscribirTareaFrame(AdminTareas adminTareas, ListaTareasFrame ventanaPrincipal, String descripcion, String filtro) {
         initComponents();
         this.descripcion = descripcion;
         this.adminTareas = adminTareas;
         this.ventanaPrincipal = ventanaPrincipal;
+        this.filtro = filtro;
 
         txtIngresarTarea.setText(descripcion); // Mostrar la tarea a editar en el campo de texto
         editar = true;
@@ -125,14 +146,16 @@ public class EscribirTareaFrame extends javax.swing.JFrame {
         if (editar) {
             // Editar la tarea existente
             adminTareas.editarTarea(descripcion, txtIngresarTarea.getText());
+           
         } else {
             // Agregar nueva tarea
             adminTareas.agregarTarea(txtIngresarTarea.getText());
         }
-
+        
         // Cerrar ventana y actualizar la lista de tareas
-        this.dispose();
-        ventanaPrincipal.actualizar(adminTareas);
+         this.dispose();
+         ventanaPrincipal.actualizar(adminTareas, filtro);
+        
     }//GEN-LAST:event_btnAceptarActionPerformed
 
     private void txtIngresarTareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIngresarTareaActionPerformed
