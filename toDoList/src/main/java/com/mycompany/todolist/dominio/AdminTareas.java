@@ -1,7 +1,16 @@
 package com.mycompany.todolist.dominio;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mycompany.todolist.conexion.IConexion;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.text.Document;
+import org.bson.conversions.Bson;
 
 /**
  *
@@ -9,23 +18,36 @@ import java.util.List;
  */
 public class AdminTareas {
 
-    private List<Tarea> tareas; // Lista que almacena las tareas
+    public String nombreColeccion = "tareas";
+    static final Logger logger = Logger.getLogger(AdminTareas.class.getName());
+    private IConexion conexion; // Lista que almacena las tareas
 
+    
     /**
-     * Constructor por defecto que inicializa la lista de tareas.
+     * Constructor por defecto que establece la conexión con la base de datos
      */
-    public AdminTareas() {
-        this.tareas = new ArrayList<>(); // Inicializa la lista de tareas
+    public AdminTareas(IConexion conexion) {
+        this.conexion = conexion;
     }
-
+    
     /**
      * Agrega una nueva tarea a la lista.
      * 
      * @param descripcion Descripción de la tarea a agregar.
      */
     public void agregarTarea(String descripcion) {
-        tareas.add(new Tarea(descripcion)); // Crea una nueva tarea con la descripción proporcionada y la agrega a la lista
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            Tarea nuevaTarea = new Tarea(descripcion);
+            coleccion.insertOne(nuevaTarea); // Inserta la tarea en la colección
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al agregar tarea", ex);
+        }
     }
+
 
     /**
      * Edita la descripción de una tarea existente.
@@ -34,12 +56,16 @@ public class AdminTareas {
      * @param newDescripcion Nueva descripción para la tarea.
      */
     public void editarTarea(String descripcion, String newDescripcion) {
-        // Busca la tarea usando la descripción actual y actualiza su descripción
-        for (Tarea tarea : tareas) {
-            if (tarea.getDescripcion().equals(descripcion)) {
-                tarea.setDescripcion(newDescripcion); // Cambia la descripción de la tarea
-                break; // Sale del ciclo una vez encontrada y editada la tarea
-            }
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Busca y actualiza la tarea en la colección
+            coleccion.updateOne(Filters.eq("descripcion", descripcion),
+                    Updates.set("descripcion", newDescripcion));
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al editar tarea", ex);
         }
     }
 
@@ -49,11 +75,40 @@ public class AdminTareas {
      * @param descripcion Descripción de la tarea que se desea eliminar.
      */
     public void eliminarTarea(String descripcion) {
-        for (int i = 0; i < tareas.size(); i++) {
-            if (tareas.get(i).getDescripcion().equals(descripcion)) {
-                tareas.remove(i); // Elimina la tarea en el índice encontrado
-                break; // Sale del ciclo una vez eliminada la tarea
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Elimina la tarea que coincide con la descripción
+            coleccion.deleteOne(Filters.eq("descripcion", descripcion));
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al eliminar tarea", ex);
+        }
+    }
+    
+    /**
+     * Cambia el estado de una tarea según su estado anterior.
+     * 
+     * @param descripcion Descripción de la tarea a actualizar.
+     */
+    public void cambiarEstadoTarea(String descripcion) {
+        Bson filtro = Filters.eq("descripcion", descripcion);
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Buscar el documento que coincida con el filtro
+            Tarea tarea = coleccion.find(filtro).first();
+            
+            // Crear la actualización para cambiar el estado a completada o pendiente
+            if (tarea.getEstaCompletada()) {
+                coleccion.updateOne(Filters.eq("descripcion", descripcion), Updates.set("estaCompletada", false));
+            } else {
+                coleccion.updateOne(Filters.eq("descripcion", descripcion), Updates.set("estaCompletada", true));
             }
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al actualizar tarea", ex);
         }
     }
 
@@ -63,17 +118,21 @@ public class AdminTareas {
      * @return La lista de tareas.
      */
     public List<Tarea> getTareas() {
-        return tareas; // Retorna la lista de tareas
+        List<Tarea> tareas = new ArrayList<>();
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Recupera todas las tareas de la colección
+            coleccion.find().into(tareas);
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al obtener la lista de tareas", ex);
+        }
+        return tareas;
     }
 
-    /**
-     * Imprime la lista de tareas en la consola con índices.
-     */
-    public void listaTareas() {
-        for (int i = 0; i < tareas.size(); i++) {
-            System.out.println((i + 1) + ". " + tareas.get(i)); // Muestra cada tarea con un índice
-        }
-    }
+    
 
     /**
      * Obtiene una lista de todas las tareas completadas.
@@ -82,12 +141,17 @@ public class AdminTareas {
      */
     public List<Tarea> obtenerTareasCompletadas() {
         List<Tarea> tareasCompletadas = new ArrayList<>();
-        for (Tarea tarea : tareas) {
-            if (tarea.isEstaCompletada()) {
-                tareasCompletadas.add(tarea); // Agrega las tareas completadas a la nueva lista
-            }
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Filtra y obtiene las tareas completadas
+            coleccion.find(Filters.eq("estaCompletada", true)).into(tareasCompletadas);
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al obtener tareas completadas", ex);
         }
-        return tareasCompletadas; // Retorna la lista de tareas completadas
+        return tareasCompletadas;
     }
 
     /**
@@ -97,12 +161,17 @@ public class AdminTareas {
      */
     public List<Tarea> obtenerTareasPendientes() {
         List<Tarea> tareasPendientes = new ArrayList<>();
-        for (Tarea tarea : tareas) {
-            if (!tarea.isEstaCompletada()) {
-                tareasPendientes.add(tarea); // Agrega las tareas pendientes a la nueva lista
-            }
+        try {
+            MongoDatabase base = conexion.obtenerBaseDatos();
+            MongoCollection<Tarea> coleccion = base.getCollection(nombreColeccion, Tarea.class);
+
+            // Filtra y obtiene las tareas pendientes
+            coleccion.find(Filters.eq("estaCompletada", false)).into(tareasPendientes);
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error al obtener tareas pendientes", ex);
         }
-        return tareasPendientes; // Retorna la lista de tareas pendientes
+        return tareasPendientes;
     }
 
 }

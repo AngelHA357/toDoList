@@ -14,6 +14,10 @@ public class Tarea {
     private String descripcion;
     private boolean estaCompletada;
 
+    public Tarea(){
+        
+    }
+    
     /**
      * Constructor que crea una nueva tarea con la descripción dada. La tarea se
      * inicializa como no completada.
@@ -39,7 +43,7 @@ public class Tarea {
      *
      * @return true si la tarea está completada, false en caso contrario.
      */
-    public boolean isEstaCompletada() {
+    public boolean getEstaCompletada() {
         return estaCompletada;
     }
 
@@ -58,7 +62,7 @@ public class Tarea {
      * @param estaCompletada true si la tarea está completada, false en caso
      * contrario.
      */
-    public void setCompletada(boolean estaCompletada) {
+    public void setEstaCompletada(boolean estaCompletada) {
         this.estaCompletada = estaCompletada;
     }
 

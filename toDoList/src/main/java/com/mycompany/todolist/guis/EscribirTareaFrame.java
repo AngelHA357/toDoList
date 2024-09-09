@@ -5,7 +5,6 @@
 package com.mycompany.todolist.guis;
 
 import com.mycompany.todolist.dominio.AdminTareas;
-import com.mycompany.todolist.dominio.Tarea;
 
 /**
  *
@@ -25,8 +24,7 @@ public class EscribirTareaFrame extends javax.swing.JFrame {
      * @param adminTareas El administrador de tareas que gestiona las tareas.
      * @param ventanaPrincipal La ventana principal que muestra la lista de
      * tareas.
-     * @param filtro El filtro actual de las tareas (Pendientes, Completadas,
-     * etc.).
+     * @param filtro El filtro actual de las tareas (pendientes y completadas).
      */
     public EscribirTareaFrame(AdminTareas adminTareas, ListaTareasFrame ventanaPrincipal, String filtro) {
         initComponents();
@@ -151,13 +149,21 @@ public class EscribirTareaFrame extends javax.swing.JFrame {
             // Agregar nueva tarea
             adminTareas.agregarTarea(txtIngresarTarea.getText());
         }
-        
-        // Cerrar ventana y actualizar la lista de tareas
-         this.dispose();
-         ventanaPrincipal.actualizar(adminTareas, filtro);
-        
+
+        ventanaPrincipal.actualizar(adminTareas);
+        this.dispose();
+
+
     }//GEN-LAST:event_btnAceptarActionPerformed
 
+    /**
+     * Obtener el filtro actualizado
+     * @return Filtro actualizado
+     */
+    public String getUpdatedFilter() {
+        return filtro;
+    }
+    
     private void txtIngresarTareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIngresarTareaActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtIngresarTareaActionPerformed

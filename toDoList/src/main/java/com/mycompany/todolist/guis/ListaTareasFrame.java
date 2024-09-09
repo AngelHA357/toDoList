@@ -4,6 +4,7 @@
  */
 package com.mycompany.todolist.guis;
 
+import com.mycompany.todolist.conexion.IConexion;
 import com.mycompany.todolist.dominio.AdminTareas;
 import com.mycompany.todolist.dominio.Tarea;
 import java.awt.Window;
@@ -13,6 +14,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -24,19 +27,23 @@ import javax.swing.JRadioButton;
  * Clase de frame principal, donde se miran las tareas y las distintas opciones.
  */
 public class ListaTareasFrame extends javax.swing.JFrame {
+    private IConexion conexion;
     private AdminTareas adminTareas;
     private JRadioButton selectedRadioButton = null;
     private ButtonGroup buttonGroup = new ButtonGroup();
     String filtro;
+    int yPositionPendientes, yPositionCompletadas;
 
     /**
      * Constructor por defecto
+     * @param conexion Conexion con la base de datos
      */
-    public ListaTareasFrame() {
-        adminTareas = new AdminTareas();
+    public ListaTareasFrame(IConexion conexion) {
+        adminTareas = new AdminTareas(conexion);
         initComponents();
-        setElementosVisibles();
         filtro = "Todas";
+        filtroCbox.setSelectedIndex(0);
+        actualizar(adminTareas);
     }
 
     /**
@@ -46,146 +53,126 @@ public class ListaTareasFrame extends javax.swing.JFrame {
     public ListaTareasFrame(AdminTareas adminTareas) {
         this.adminTareas = adminTareas;
         initComponents();
-        setElementosVisibles();
     }
 
     /**
-     * Configura la visibilidad de los elementos iniciales en la interfaz
-     */
-    private void setElementosVisibles() {
-        lblTareasCompletadas.setVisible(false);
-        lblTareasPendientes.setVisible(false);
-        eliminarBtn.setVisible(false);
-        editarBtn.setVisible(false);
-        filtroCbox.setVisible(false);
-    }
-
-    /**
-     * Actualiza la lista de tareas según el filtro proporcionado
+     * Actualiza el frame después de ejecutar alguna acción
+     *
      * @param adminTareas Manejador de tareas
-     * @param filtro Filtro para ver ciertas tareas
      */
-    public void actualizar(AdminTareas adminTareas, String filtro) {
-        this.filtro = filtro;
-        jPanel1.removeAll(); // Elimina todos los componentes del panel
-        
-        filtroCbox.setVisible(true); // Asegura que el combobox de filtro sea visible
-        
-        buttonGroup = new ButtonGroup(); // Reinicia el grupo de botones
+    public void actualizar(AdminTareas adminTareas) {
+        jPanel1.revalidate();
+        jPanel1.repaint();
+        jPanel1.removeAll();
+        filtroCbox.setVisible(true);
 
-        jPanel1.setLayout(null); // Usa un layout absoluto para el panel
-        jPanel1.add(filtroCbox); // Agrega el combobox al panel
+        buttonGroup = new ButtonGroup();
+        selectedRadioButton = null;
 
-        // Posiciones iniciales para las tareas pendientes y completadas
-        int yPositionPendientes = lblTareasPendientes.getY() + lblTareasPendientes.getHeight() + 10;
-        int yPositionCompletadas = lblTareasCompletadas.getY() + lblTareasCompletadas.getHeight() + 10;
+        jPanel1.setLayout(null);
+        jPanel1.add(filtroCbox);
+        jPanel1.add(lblTareasCompletadas);
+        jPanel1.add(lblTareasPendientes);
 
-        List<Tarea> tareas = adminTareas.getTareas(); // Obtiene la lista de tareas
-
-        // Añade las etiquetas correspondientes y las muestra según el estado de las tareas
-        for (Tarea tarea : tareas) {
-            if (!tarea.isEstaCompletada()) {
-                jPanel1.add(lblTareasPendientes);
-                lblTareasPendientes.setVisible(true);
-            } else {
-                jPanel1.add(lblTareasCompletadas);
-                lblTareasCompletadas.setVisible(true);
-            }
-        }
-
-        // Oculta las etiquetas según el filtro seleccionado
+        // Obtener las tareas según el filtro
+        List<Tarea> tareas;
         if (filtro.equals("Pendientes")) {
             lblTareasCompletadas.setVisible(false);
+            lblTareasPendientes.setVisible(true);
+            tareas = adminTareas.obtenerTareasPendientes();
         } else if (filtro.equals("Completadas")) {
             lblTareasPendientes.setVisible(false);
+            lblTareasCompletadas.setVisible(true);
+            tareas = adminTareas.obtenerTareasCompletadas();
+        } else {
+            lblTareasPendientes.setVisible(true);
+            lblTareasCompletadas.setVisible(true);
+            tareas = adminTareas.getTareas();
         }
 
-        // Crea y posiciona los botones de radio para cada tarea
+        if (tareas.isEmpty()){
+            jPanel1.add(cerrarInstruccionBtn);
+            jPanel1.add(lblInstruccion);
+//            cerrarInstruccionBtn.setVisible(true);
+//            lblInstruccion.setVisible(true);
+        }
+        
+        // Posiciones iniciales para tareas
+        yPositionPendientes = lblTareasPendientes.getY() + lblTareasPendientes.getHeight() + 10;
+        yPositionCompletadas = lblTareasCompletadas.getY() + lblTareasCompletadas.getHeight() + 10;
+
         for (Tarea tarea : tareas) {
             JRadioButton radioButton = new JRadioButton(tarea.getDescripcion());
-
-            // Acción al seleccionar el radio button
-            radioButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    selectedRadioButton = radioButton;
-                    if (!tarea.isEstaCompletada()) {
-                        eliminarBtn.setVisible(true);
-                        editarBtn.setVisible(true);
-                    } else {
-                        eliminarBtn.setVisible(false);
-                        editarBtn.setVisible(false);
-                    }
-                }
+            radioButton.addActionListener(e -> {
+                selectedRadioButton = radioButton;
+                boolean isCompletada = tarea.getEstaCompletada();
+                eliminarBtn.setVisible(!isCompletada);
+                editarBtn.setVisible(!isCompletada);
             });
 
-            // Detecta la tecla ENTER para marcar la tarea como completada o pendiente
             radioButton.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     if (radioButton.isSelected() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        if (tarea.isEstaCompletada()) {
-                            tarea.setCompletada(false); // Cambia el estado a pendiente
-                        } else {
-                            tarea.setCompletada(true); // Cambia el estado a completada
-                        }
-                        actualizar(adminTareas, filtro); // Actualiza la lista según el filtro
+                        tarea.setEstaCompletada(!tarea.getEstaCompletada());
+                        adminTareas.cambiarEstadoTarea(tarea.getDescripcion());
+                        actualizar(adminTareas);
                     }
                 }
             });
 
-            // Añade la tarea al panel según su estado
-            if (tarea.isEstaCompletada()) {
-                radioButton.setBounds(lblTareasCompletadas.getX(), yPositionCompletadas, 300, 30);
-                yPositionCompletadas += 40; // Incrementa la posición vertical para la siguiente tarea completada
-                if (filtro.equals("Pendientes")) {
-                    radioButton.setVisible(false); // Oculta si el filtro es "Pendientes"
+            // Posicionar la tarea
+            if (tarea.getEstaCompletada()) {
+                if (filtro.equals("Completadas") || filtro.equals("Todas")) {
+                    radioButton.setBounds(lblTareasCompletadas.getX(), yPositionCompletadas, 300, 30);
+                    yPositionCompletadas += 40;
+                } else {
+                    radioButton.setVisible(false); // Ocultar si el filtro es "Pendientes"
                 }
             } else {
-                radioButton.setBounds(lblTareasPendientes.getX(), yPositionPendientes, 300, 30);
-                yPositionPendientes += 40; // Incrementa la posición vertical para la siguiente tarea pendiente
-                if (filtro.equals("Completadas")) {
-                    radioButton.setVisible(false); // Oculta si el filtro es "Completadas"
+                if (filtro.equals("Pendientes") || filtro.equals("Todas")) {
+                    radioButton.setBounds(lblTareasPendientes.getX(), yPositionPendientes, 300, 30);
+                    yPositionPendientes += 40;
+                } else {
+                    radioButton.setVisible(false); // Ocultar si el filtro es "Completadas"
                 }
             }
-            buttonGroup.add(radioButton); // Añade el botón al grupo
-            jPanel1.add(radioButton); // Añade el botón al panel
+
+            buttonGroup.add(radioButton);
+            jPanel1.add(radioButton);
         }
 
-        // Configura el listener para el botón de eliminar
-        eliminarBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (selectedRadioButton != null) {
-                    String descripcionSeleccionada = selectedRadioButton.getText();
-                    Tarea tareaAEliminar = null;
+        // Listener para eliminar tarea
+        eliminarBtn.addActionListener(e -> {
+            if (selectedRadioButton != null) {
+                String descripcionSeleccionada = selectedRadioButton.getText();
+                Tarea tareaAEliminar = null;
 
-                    // Busca la tarea a eliminar por su descripción
-                    for (Tarea tarea : tareas) {
-                        if (tarea.getDescripcion().equals(descripcionSeleccionada)) {
-                            tareaAEliminar = tarea;
-                            break;
-                        }
+                // Buscar la tarea a eliminar por su descripción
+                for (Tarea tarea : tareas) {
+                    if (tarea.getDescripcion().equals(descripcionSeleccionada)) {
+                        tareaAEliminar = tarea;
+                        break;
                     }
+                }
 
-                    if (tareaAEliminar != null) {
-                        adminTareas.eliminarTarea(tareaAEliminar.getDescripcion());
-                        actualizar(adminTareas, filtro); // Actualiza la lista después de eliminar la tarea
-                    }
+                if (tareaAEliminar != null) {
+                    adminTareas.eliminarTarea(tareaAEliminar.getDescripcion());
+                    actualizar(adminTareas); // Volver a actualizar la lista
                 }
             }
         });
 
-        // Configura el listener para el botón de editar
+        // Listener para editar tarea
         editarBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (selectedRadioButton != null) {
                     String descripcionSeleccionada = selectedRadioButton.getText();
-                    
+
                     Tarea tareaAEditar = null;
 
-                    // Busca la tarea a eliminar por su descripción
+                    // Buscar la tarea a editar por su descripción
                     for (Tarea tarea : tareas) {
                         if (tarea.getDescripcion().equals(descripcionSeleccionada)) {
                             tareaAEditar = tarea;
@@ -193,17 +180,16 @@ public class ListaTareasFrame extends javax.swing.JFrame {
                         }
                     }
 
-                    // Evita abrir múltiples instancias de la ventana de edición
+                    // Evitar abrir múltiples instancias de la ventana de edición
                     if (!isEditingWindowOpen() && tareaAEditar != null) {
-                        EscribirTareaFrame editarTarea = new EscribirTareaFrame(adminTareas, ListaTareasFrame.this, descripcionSeleccionada, "Pendientes");
+                        EscribirTareaFrame editarTarea = new EscribirTareaFrame(adminTareas, ListaTareasFrame.this, descripcionSeleccionada, filtro);
                         editarTarea.setVisible(true);
-                        
                     }
                 }
             }
         });
 
-        // Configura la posición de los botones y los agrega al panel
+        // Ajustar la posición y añadir los botones
         botonAgregar.setBounds(botonAgregar.getX(), botonAgregar.getY(), botonAgregar.getWidth(), botonAgregar.getHeight());
         jPanel1.add(botonAgregar);
 
@@ -213,14 +199,14 @@ public class ListaTareasFrame extends javax.swing.JFrame {
         editarBtn.setBounds(editarBtn.getX(), editarBtn.getY(), editarBtn.getWidth(), editarBtn.getHeight());
         jPanel1.add(editarBtn);
 
-        // Actualiza la interfaz de usuario
-        revalidate();
-        repaint();
+        jPanel1.revalidate();
+        jPanel1.repaint();
     }
 
     /**
      * Verifica si hay una ventana de edición abierta
-     * @return 
+     *
+     * @return
      */
     private boolean isEditingWindowOpen() {
         for (Window window : Window.getWindows()) {
@@ -273,9 +259,9 @@ public class ListaTareasFrame extends javax.swing.JFrame {
         jPanel1.add(lblTareasCompletadas, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 90, -1, -1));
 
         lblInstruccion.setBackground(new java.awt.Color(255, 255, 255));
-        lblInstruccion.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        lblInstruccion.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         lblInstruccion.setText("Enter para marcar tarea como completada");
-        jPanel1.add(lblInstruccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 240, -1, -1));
+        jPanel1.add(lblInstruccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 60, -1, -1));
 
         editarBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/editarDibujo.png"))); // NOI18N
         editarBtn.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -294,7 +280,7 @@ public class ListaTareasFrame extends javax.swing.JFrame {
                 cerrarInstruccionBtnActionPerformed(evt);
             }
         });
-        jPanel1.add(cerrarInstruccionBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 210, 20, 20));
+        jPanel1.add(cerrarInstruccionBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 40, 20, 20));
 
         lblTareasPendientes.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblTareasPendientes.setText("Tareas pendientes");
@@ -329,6 +315,7 @@ public class ListaTareasFrame extends javax.swing.JFrame {
     private void botonAgregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonAgregarMouseClicked
         EscribirTareaFrame escribirTarea = new EscribirTareaFrame(adminTareas, this, filtro);
         escribirTarea.setVisible(true);
+        actualizar(adminTareas);
     }//GEN-LAST:event_botonAgregarMouseClicked
 
     private void botonAgregarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonAgregarMousePressed
@@ -350,48 +337,18 @@ public class ListaTareasFrame extends javax.swing.JFrame {
 
     private void filtroCboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filtroCboxActionPerformed
         if (filtroCbox.getSelectedIndex() == 0) {
-            actualizar(adminTareas, "Todas");
+            filtro = "Todas";
+            actualizar(adminTareas);
         } else if (filtroCbox.getSelectedIndex() == 1) {
-            actualizar(adminTareas, "Pendientes");
+            filtro = "Pendientes";
+            actualizar(adminTareas);
         } else if (filtroCbox.getSelectedIndex() == 2) {
-            actualizar(adminTareas, "Completadas");
+            filtro = "Completadas";
+            actualizar(adminTareas); 
         }
     }//GEN-LAST:event_filtroCboxActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ListaTareasFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ListaTareasFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ListaTareasFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ListaTareasFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ListaTareasFrame().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel botonAgregar;

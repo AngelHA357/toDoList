@@ -4,6 +4,8 @@
  */
 package com.mycompany.todolist;
 
+import com.mycompany.todolist.conexion.Conexion;
+import com.mycompany.todolist.conexion.IConexion;
 import com.mycompany.todolist.guis.ListaTareasFrame;
 
 /**
@@ -12,7 +14,8 @@ import com.mycompany.todolist.guis.ListaTareasFrame;
  */
 public class ToDoList {
     public static void main(String args[]){
-        ListaTareasFrame mainFrame = new ListaTareasFrame();
+        IConexion conexion = new Conexion();
+        ListaTareasFrame mainFrame = new ListaTareasFrame(conexion);
         mainFrame.setVisible(true);
     }
     
