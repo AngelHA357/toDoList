@@ -1,18 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
- */
-package com.mycompany.todolist.test;
-
-import com.mycompany.todolist.dominio.AdminTareas;
-import com.mycompany.todolist.dominio.Tarea;
-import java.util.List;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+///*
+// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+// * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
+// */
+//package com.mycompany.todolist.test;
+//
+//import com.mycompany.todolist.dominio.AdminTareas;
+//import com.mycompany.todolist.dominio.Tarea;
+//import java.util.List;
+//import org.junit.After;
+//import org.junit.AfterClass;
+//import org.junit.Before;
+//import org.junit.BeforeClass;
+//import org.junit.Test;
+//import static org.junit.Assert.*;
 
 /**
  * Clase de pruebas para AdminTareas. Contiene pruebas unitarias y de
@@ -45,10 +45,10 @@ import static org.junit.Assert.*;
 //    public void tearDown() {
 //    }
 //
-//    /**
-//     * Prueba para agregar una tarea y verificar que ha sido agregada
-//     * correctamente.
-//     */
+    /**
+     * Prueba para agregar una tarea y verificar que ha sido agregada
+     * correctamente.
+     */
 //    @Test
 //    public void testAgregarTarea() {
 //        adminTareas.agregarTarea("Una tarea");

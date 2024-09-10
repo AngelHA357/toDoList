@@ -15,8 +15,8 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 /**
- *
- * @author JoseH
+ * Clase que permite crear la conexión a la base de datos
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public class Conexion implements IConexion{
 
@@ -25,6 +25,7 @@ public class Conexion implements IConexion{
     public String nombreBaseDatos = "toDoList";
 
     // Método para obtener la base de datos
+    @Override
     public MongoDatabase obtenerBaseDatos() {
         // Crear el CodecRegistry para manejar objetos POJO
         CodecRegistry pojoCodecRegistry = fromRegistries(

@@ -7,8 +7,8 @@ package com.mycompany.todolist.conexion;
 import com.mongodb.client.MongoDatabase;
 
 /**
- *
- * @author JoseH
+ * Interfaz que contiene el método para crear la conexión a la base de datos.
+ * @author Jose Armenta, Jose Huerta, Victor Encinas
  */
 public interface IConexion {
     public MongoDatabase obtenerBaseDatos();
